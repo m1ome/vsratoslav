@@ -14,14 +14,23 @@ const lineSpacing = 1.3
 
 func pointsSize(phrase string, width int) float64 {
 	runeCount := float64(utf8.RuneCount([]byte(phrase)))
+	basePointSize := float64(basePoints(width))
 
 	if runeCount < 15 {
-		return 45
+		return basePointSize * 1.5
 	} else if runeCount < 10 {
-		return 60
+		return basePointSize * 2
 	} else {
-		return 28
+		return basePointSize
 	}
+}
+
+func basePoints(width int) int {
+	if width > 1024 {
+		return 60
+	}
+
+	return 30
 }
 
 func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
@@ -37,7 +46,6 @@ func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
 	txt.SetColor(color.White)
 
 	pointSize := pointsSize(phrase, txt.Width())
-	fmt.Printf("string: %s / point size: %f\n", phrase, pointSize)
 	if err := txt.LoadFontFace(font, pointSize); err != nil {
 		return nil, fmt.Errorf("error loading font: %v", err)
 	}
