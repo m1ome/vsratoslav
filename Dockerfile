@@ -10,7 +10,9 @@ COPY . .
 
 RUN go build -o vsratoslav
 
-FROM ubuntu
+FROM alpine:3.15
+
+RUN apk add --update bash openssl
 
 WORKDIR /app
 
