@@ -26,7 +26,9 @@ func pointsSize(phrase string, width int) float64 {
 }
 
 func basePoints(width int) int {
-	if width > 1024 {
+	if width > 2048 {
+		return 90
+	} else if width > 1024 {
 		return 60
 	}
 
