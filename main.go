@@ -118,6 +118,8 @@ func main() {
 			return nil
 		}
 
+		log.Printf("set percent to %d for chat %d", percent, c.Chat().ID)
+
 		return nil
 	})
 
