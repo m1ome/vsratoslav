@@ -10,13 +10,18 @@ import (
 	"unicode/utf8"
 )
 
+const lineSpacing = 1.3
+
 func pointsSize(phrase string, width int) float64 {
 	runeCount := float64(utf8.RuneCount([]byte(phrase)))
-	if runeCount < 15 {
-		runeCount = 15
-	}
 
-	return 20 + float64(width)/runeCount
+	if runeCount < 15 {
+		return 45
+	} else if runeCount < 10 {
+		return 60
+	} else {
+		return 28
+	}
 }
 
 func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
@@ -36,13 +41,21 @@ func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
 	if err := txt.LoadFontFace(font, pointSize); err != nil {
 		return nil, fmt.Errorf("error loading font: %v", err)
 	}
-	_, h := txt.MeasureString(phrase)
+	_, h := txt.MeasureMultilineString(phrase, lineSpacing)
+
+	width := float64(txt.Width())
+	height := float64(txt.Height()) - h
+
+	offset := 5.0
+	if float64(utf8.RuneCount([]byte(phrase))) > 20 {
+		offset = 25.0
+	}
 
 	txt.SetColor(color.Black)
-	txt.DrawStringAnchored(phrase, float64(txt.Width()/2)+5, float64(txt.Height())-h-20+5, 0.5, 0.5)
+	txt.DrawStringWrapped(phrase, width/2+3, height-offset+3, 0.5, 0.5, width-20, lineSpacing, gg.AlignCenter)
 
 	txt.SetColor(color.White)
-	txt.DrawStringAnchored(phrase, float64(txt.Width()/2), float64(txt.Height())-h-20, 0.5, 0.5)
+	txt.DrawStringWrapped(phrase, width/2, height-offset, 0.5, 0.5, width-20, lineSpacing, gg.AlignCenter)
 
 	im.DrawImage(txt.Image(), 0, 0)
 
