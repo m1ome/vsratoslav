@@ -7,13 +7,16 @@ import (
 	"image"
 	"image/color"
 	"io"
-	"math"
 	"unicode/utf8"
 )
 
 func pointsSize(phrase string, width int) float64 {
-	mul := float64(width / utf8.RuneCount([]byte(phrase)))
-	return 28.0 + math.Floor(mul*0.7)
+	runeCount := float64(utf8.RuneCount([]byte(phrase)))
+	if runeCount < 15 {
+		runeCount = 15
+	}
+
+	return 20 + float64(width)/runeCount
 }
 
 func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
@@ -28,8 +31,9 @@ func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
 	txt.Clear()
 	txt.SetColor(color.White)
 
-	points := pointsSize(phrase, txt.Width())
-	if err := txt.LoadFontFace(font, points); err != nil {
+	pointSize := pointsSize(phrase, txt.Width())
+	fmt.Printf("string: %s / point size: %f\n", phrase, pointSize)
+	if err := txt.LoadFontFace(font, pointSize); err != nil {
 		return nil, fmt.Errorf("error loading font: %v", err)
 	}
 	_, h := txt.MeasureString(phrase)

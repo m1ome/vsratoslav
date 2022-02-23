@@ -14,13 +14,15 @@ func TestDrawText(t *testing.T) {
 	}
 
 	cases := map[string]string{
-		"small":  "лох",
-		"middle": "Ща будут пиздосики",
-		"long":   "Типичная русская семья времен кровавого царизма",
+		"small":    "лох",
+		"middle-1": "Чуть побольше",
+		"middle-2": "Ща будут пиздосики",
+		"middle-3": "Еще побольше фраза, но не длинная",
+		"long":     "Типичная русская семья времен кровавого царизма",
 	}
 
 	for k, v := range cases {
-		out, err := DrawText(bytes.NewReader(buf), "../Lobster-Regular.ttf", v)
+		out, err := DrawText(bytes.NewReader(buf), "../public/Lobster-Regular.ttf", v)
 		if err != nil {
 			t.Fatalf("error drawing text: %v", err)
 		}
