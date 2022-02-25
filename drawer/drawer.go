@@ -7,32 +7,30 @@ import (
 	"image"
 	"image/color"
 	"io"
+	"strings"
 	"unicode/utf8"
 )
 
 const lineSpacing = 1.3
+const basePointSize = 30
 
-func pointsSize(phrase string, width int) float64 {
+func pointsSize(phrase string, width int, height int) float64 {
 	runeCount := float64(utf8.RuneCount([]byte(phrase)))
-	basePointSize := float64(basePoints(width))
-
-	if runeCount < 15 {
-		return basePointSize * 1.5
-	} else if runeCount < 10 {
-		return basePointSize * 2
-	} else {
-		return basePointSize
+	biggerSide := width
+	if height > width {
+		biggerSide = height
 	}
+	basePointSize := float64(basePoints(biggerSide))
+
+	if runeCount > 20 {
+		return basePointSize * 0.8
+	}
+
+	return basePointSize
 }
 
 func basePoints(width int) int {
-	if width > 2048 {
-		return 90
-	} else if width > 1024 {
-		return 60
-	}
-
-	return 30
+	return basePointSize + (width/640)*32
 }
 
 func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
@@ -47,25 +45,25 @@ func DrawText(reader io.Reader, font, phrase string) (io.Reader, error) {
 	txt.Clear()
 	txt.SetColor(color.White)
 
-	pointSize := pointsSize(phrase, txt.Width())
+	pointSize := pointsSize(phrase, txt.Width(), txt.Height())
 	if err := txt.LoadFontFace(font, pointSize); err != nil {
 		return nil, fmt.Errorf("error loading font: %v", err)
 	}
-	_, h := txt.MeasureMultilineString(phrase, lineSpacing)
-
-	width := float64(txt.Width())
-	height := float64(txt.Height()) - h
-
-	offset := 5.0
-	if float64(utf8.RuneCount([]byte(phrase))) > 20 {
-		offset = 25.0
+	lines := txt.WordWrap(phrase, float64(txt.Width())-20)
+	_, textHeight := txt.MeasureMultilineString(strings.Join(lines, "\n"), lineSpacing)
+	offset := textHeight + 10
+	if len(lines) > 0 {
+		offset = offset - pointSize*float64(len(lines)-1)*0.5
 	}
 
+	x := float64(txt.Width())
+	y := float64(txt.Height()) - offset
+
 	txt.SetColor(color.Black)
-	txt.DrawStringWrapped(phrase, width/2+3, height-offset+3, 0.5, 0.5, width-20, lineSpacing, gg.AlignCenter)
+	txt.DrawStringWrapped(phrase, x/2+2, y+2, 0.5, 0.5, x-20, lineSpacing, gg.AlignCenter)
 
 	txt.SetColor(color.White)
-	txt.DrawStringWrapped(phrase, width/2, height-offset, 0.5, 0.5, width-20, lineSpacing, gg.AlignCenter)
+	txt.DrawStringWrapped(phrase, x/2, y, 0.5, 0.5, x-20, lineSpacing, gg.AlignCenter)
 
 	im.DrawImage(txt.Image(), 0, 0)
 
