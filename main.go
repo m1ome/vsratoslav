@@ -18,9 +18,8 @@ var (
 	filepath string
 	token    string
 	db       string
+	percent  int64
 )
-
-const defaultPercent = 80
 
 func randomPhrase(phrases []string) string {
 	return phrases[rand.Intn(len(phrases))]
@@ -34,18 +33,18 @@ func getPercent(db *leveldb.DB, chatId int64) int64 {
 	key := dbChatKey(chatId)
 	exists, err := db.Has(key, nil)
 	if !exists || err != nil {
-		return defaultPercent
+		return percent
 	}
 
 	val, err := db.Get(key, nil)
 	if err != nil {
-		return defaultPercent
+		return percent
 	}
 
 	v, err := strconv.ParseInt(string(val), 10, 64)
 	if err != nil {
 		db.Delete([]byte(key), nil)
-		return defaultPercent
+		return percent
 	}
 
 	return v
@@ -62,6 +61,7 @@ func main() {
 	flag.StringVar(&filepath, "file", "phrases.json", "")
 	flag.StringVar(&token, "token", "", "")
 	flag.StringVar(&db, "db", "db", "")
+	flag.Int64Var(&percent, "percent", 40, "percentage of action")
 	flag.Parse()
 
 	db, err := leveldb.OpenFile(db, nil)
