@@ -61,7 +61,7 @@ func main() {
 	flag.StringVar(&filepath, "file", "phrases.json", "")
 	flag.StringVar(&token, "token", "", "")
 	flag.StringVar(&db, "db", "db", "")
-	flag.Int64Var(&percent, "percent", 40, "percentage of action")
+	flag.Int64Var(&percent, "percent", 25, "percentage of action")
 	flag.Parse()
 
 	db, err := leveldb.OpenFile(db, nil)
